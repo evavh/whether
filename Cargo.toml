@@ -5,5 +5,5 @@ edition = "2024"
 
 [dependencies]
 color-eyre = "0.6.5"
-hdf5-metno = { version = "0.10.1", features = ["static"] }
+hdf5-metno = { version = "0.10.1", features = ["static", "zlib"] }
 log = "0.4.27"
