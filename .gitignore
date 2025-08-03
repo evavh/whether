@@ -2,3 +2,4 @@
 input/
 compilers/
 setup_crosscompile/target/
+config.toml
