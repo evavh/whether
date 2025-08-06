@@ -1,5 +1,10 @@
-use std::{collections::BTreeMap, fs};
+use std::{
+    collections::BTreeMap,
+    fs::{self, File},
+    io::BufReader,
+};
 
+use grib::codetables::{CodeTable4_2, Lookup};
 use hdf5_metno::types::FixedAscii;
 use toml::Table;
 
@@ -29,15 +34,40 @@ fn main() {
     let config: Table = config.parse().unwrap();
     let pixel = Pixel::from_config(config);
 
-    let file = hdf5_metno::File::open("input/RAD_NL25_RAC_FM_202507201425.h5")
-        .unwrap();
+    let precip_file =
+        hdf5_metno::File::open("input/RAD_NL25_RAC_FM_202507201425.h5")
+            .unwrap();
 
-    let values: BTreeMap<_, _> = (1..=25)
+    let precip: BTreeMap<_, _> = (1..=25)
         .into_iter()
-        .map(|id| read_image(&file, id, pixel))
+        .map(|id| read_image(&precip_file, id, pixel))
         .collect();
 
-    dbg!(values);
+    dbg!(precip);
+
+    let weather_file =
+        File::open("input/HA43_N20_202508031200_00000_GB").unwrap();
+    let weather_file = grib::from_reader(BufReader::new(weather_file)).unwrap();
+
+    for (_index, submessage) in weather_file.iter() {
+        let discipline = submessage.indicator().discipline;
+        let category = submessage.prod_def().parameter_category().unwrap();
+        let parameter = submessage.prod_def().parameter_number().unwrap();
+        let parameter = CodeTable4_2::new(discipline, category)
+            .lookup(usize::from(parameter));
+
+        let forecast_time = submessage.prod_def().forecast_time().unwrap();
+
+        let (first, _second) = submessage.prod_def().fixed_surfaces().unwrap();
+        let elevation_level = first.value();
+
+        println!(
+            "{:<31} {:>14} {:>17}",
+            parameter.to_string(),
+            forecast_time.to_string(),
+            elevation_level
+        );
+    }
 }
 
 fn read_image(
