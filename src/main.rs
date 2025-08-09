@@ -1,6 +1,7 @@
 use std::{
     collections::{BTreeMap, HashMap},
     fs,
+    io::Write,
 };
 
 use hdf5_metno::types::FixedAscii;
@@ -52,14 +53,13 @@ impl Pixel {
     }
 }
 
-#[tokio::main]
-async fn main() {
+fn main() {
     let config = fs::read_to_string(CONFIG).unwrap();
     let config: Table = config.parse().unwrap();
     let pixel = Pixel::from_config(&config);
     let knmi_api_key = config["knmi_api_key"].as_str().unwrap();
 
-    let client = Client::new();
+    let client = reqwest::blocking::Client::new();
     let precip_file_list: PrecipResponse = client
         .get(PRECIP_URL)
         .header(header::AUTHORIZATION, knmi_api_key)
@@ -69,25 +69,24 @@ async fn main() {
             order_by: String::from("lastModified"),
         })
         .send()
-        .await
         .unwrap()
         .json()
-        .await
         .unwrap();
     let latest_precip_filename = precip_file_list.files[0].filename.clone();
     let precip_file_url: FileUrl = client
         .get(&format!("{PRECIP_URL}/{latest_precip_filename}/url"))
         .header(header::AUTHORIZATION, knmi_api_key)
         .send()
-        .await
         .unwrap()
         .json()
-        .await
         .unwrap();
     let precip_file_url = precip_file_url.temporaryDownloadUrl;
 
     let precip_path = &format!("input/{latest_precip_filename}");
-    download_file(&precip_file_url, precip_path).await;
+
+    let file_content =
+        client.get(precip_file_url).send().unwrap().bytes().unwrap();
+    fs::write(precip_path, &file_content).unwrap();
 
     let precip_file = hdf5_metno::File::open(precip_path).unwrap();
 
@@ -97,22 +96,6 @@ async fn main() {
         .collect();
 
     dbg!(precip);
-}
-
-async fn download_file(url: &str, path: &str) {
-    use tokio::io::AsyncWriteExt;
-
-    let client = reqwest::Client::new();
-    let mut response = client
-        .get(url)
-        .send()
-        .await
-        .unwrap();
-    let mut file = tokio::fs::File::create(path).await.unwrap();
-
-    while let Some(mut item) = response.chunk().await.unwrap() {
-        file.write_all_buf(&mut item).await.unwrap();
-    }
 }
 
 fn read_image(
