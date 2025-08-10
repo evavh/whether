@@ -1,11 +1,7 @@
-use std::{
-    collections::{BTreeMap, HashMap},
-    fs,
-    io::Write,
-};
+use std::{collections::BTreeMap, fs};
 
 use hdf5_metno::types::FixedAscii;
-use reqwest::{Client, Method, header};
+use reqwest::header;
 use serde::{Deserialize, Serialize};
 use toml::Table;
 
@@ -24,11 +20,13 @@ struct PrecipFile {
     filename: String,
 }
 
+#[allow(non_snake_case)]
 #[derive(Deserialize, Debug)]
 struct FileUrl {
     temporaryDownloadUrl: String,
 }
 
+#[allow(non_snake_case)]
 #[derive(Serialize)]
 struct Params {
     maxKeys: usize,
@@ -74,7 +72,7 @@ fn main() {
         .unwrap();
     let latest_precip_filename = precip_file_list.files[0].filename.clone();
     let precip_file_url: FileUrl = client
-        .get(&format!("{PRECIP_URL}/{latest_precip_filename}/url"))
+        .get(format!("{PRECIP_URL}/{latest_precip_filename}/url"))
         .header(header::AUTHORIZATION, knmi_api_key)
         .send()
         .unwrap()
@@ -91,7 +89,6 @@ fn main() {
     let precip_file = hdf5_metno::File::open(precip_path).unwrap();
 
     let precip: BTreeMap<_, _> = (1..=25)
-        .into_iter()
         .map(|id| read_image(&precip_file, id, pixel))
         .collect();
 
