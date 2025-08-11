@@ -4,6 +4,7 @@ use toml::Table;
 
 mod files;
 mod precip;
+mod plot;
 
 const CONFIG: &str = "config.toml";
 
@@ -13,6 +14,6 @@ fn main() {
 
     let precip = precip::get_precip_data(config);
 
-    dbg!(precip);
+    plot::plot("output/plot.svg", precip);
 }
 
