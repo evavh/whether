@@ -1,15 +1,16 @@
 use std::{collections::BTreeMap, fs};
 
+use chrono::{DateTime, Local, NaiveDateTime};
 use hdf5_metno::types::FixedAscii;
 use reqwest::{blocking, header};
 use serde::{Deserialize, Serialize};
-use toml::{map::Map, Table, Value};
+use toml::{Table, Value, map::Map};
 
 const PRECIP_URL: &str = "https://api.dataplatform.knmi.nl/open-data/v1/datasets/radar_forecast/versions/2.0/files";
 
 pub(super) fn get_precip_data(
     config: Map<String, Value>,
-) -> BTreeMap<String, u16> {
+) -> BTreeMap<DateTime<Local>, u16> {
     let pixel = Pixel::from_config(&config);
     let knmi_api_key = config["knmi_api_key"].as_str().unwrap();
     let client = blocking::Client::new();
@@ -60,11 +61,7 @@ fn get_file_url(
     precip_file_url
 }
 
-fn download_file(
-    client: blocking::Client,
-    file_url: String,
-    path: &String,
-) {
+fn download_file(client: blocking::Client, file_url: String, path: &String) {
     let file_content = client.get(file_url).send().unwrap().bytes().unwrap();
     fs::write(path, &file_content).unwrap();
 }
@@ -73,7 +70,7 @@ fn read_image(
     file: &hdf5_metno::File,
     image_id: usize,
     pixel: Pixel,
-) -> (String, u16) {
+) -> (DateTime<Local>, u16) {
     let image_group = file.group(&format!("image{image_id}")).unwrap();
 
     let image_time = image_group.attr("image_datetime_valid").unwrap();
@@ -81,11 +78,14 @@ fn read_image(
     let image = image.read_2d::<u16>().unwrap();
 
     let value = image.get((pixel.x, pixel.y)).unwrap();
-    let image_time = image_time
-        .read_scalar::<FixedAscii<25>>()
-        .unwrap()
-        .as_str()
-        .to_owned();
+    let image_time = image_time.read_scalar::<FixedAscii<25>>().unwrap();
+    let image_time = NaiveDateTime::parse_from_str(
+        image_time.as_str(),
+        "%d-%b-%Y;%H:%M:%S%.f",
+    )
+    .unwrap()
+    .and_utc()
+    .with_timezone(&Local);
     (image_time, *value)
 }
 
