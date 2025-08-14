@@ -8,10 +8,10 @@ use crate::pdf::{PLOT_HEIGHT_PIXEL, PLOT_WIDTH_PIXEL};
 
 const TEXT_SIZE_PT: u32 = 40;
 
-pub(super) fn plot(path: &str, data: BTreeMap<DateTime<Local>, u16>) {
+pub(super) fn plot(path: &str, data: &BTreeMap<DateTime<Local>, u16>) {
     let (&start_time, _) = data.first_key_value().unwrap();
     let (&end_time, _) = data.last_key_value().unwrap();
-    let max_value = *data.values().max().unwrap() as f64;
+    let max_value = f64::from(*data.values().max().unwrap());
 
     let root = SVGBackend::new(
         path,
@@ -44,7 +44,7 @@ pub(super) fn plot(path: &str, data: BTreeMap<DateTime<Local>, u16>) {
 
     chart
         .draw_series(LineSeries::new(
-            data.iter().map(|(t, y)| (*t, *y as f64)),
+            data.iter().map(|(t, y)| (*t, f64::from(*y))),
             &BLUE,
         ))
         .unwrap();

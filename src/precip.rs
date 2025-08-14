@@ -41,8 +41,8 @@ fn get_latest_filename(
         .unwrap()
         .json()
         .unwrap();
-    let latest_precip_filename = precip_file_list.files[0].filename.clone();
-    latest_precip_filename
+
+    precip_file_list.files[0].filename.clone()
 }
 
 fn get_file_url(
@@ -57,8 +57,8 @@ fn get_file_url(
         .unwrap()
         .json()
         .unwrap();
-    let precip_file_url = precip_file_url.temporaryDownloadUrl;
-    precip_file_url
+
+    precip_file_url.temporaryDownloadUrl
 }
 
 fn download_file(client: blocking::Client, file_url: String, path: &String) {
