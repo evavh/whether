@@ -11,6 +11,7 @@ mod files;
 mod pdf;
 mod plot;
 mod precip;
+mod weather;
 
 const CONFIG: &str = "config.toml";
 
@@ -25,7 +26,9 @@ fn main() {
     let config = fs::read_to_string(CONFIG).unwrap();
     let config: Table = config.parse().unwrap();
 
-    let precip = precip::get_precip_data(config);
+    let precip = precip::get_precip_data(&config);
+    let weather = weather::get_weather(&config);
+    dbg!(weather);
 
     plot("output/plot.svg", &precip);
     let output_path = format!("output/{REPORT_UUID}.pdf");

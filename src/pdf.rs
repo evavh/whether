@@ -19,7 +19,6 @@ const PLOT_POS_X_MM: f32 = MARGIN_MM;
 const PLOT_POS_Y_MM: f32 = PAGE_HEIGHT_MM - PLOT_HEIGHT_MM - MARGIN_MM;
 
 pub(crate) fn generate_pdf(image_path: &str, output_path: &str) {
-    dbg!(PLOT_WIDTH_MM, PLOT_WIDTH_PIXEL, PLOT_POS_X_MM, PLOT_POS_Y_MM);
     let mut warnings = Vec::new();
     let mut doc = PdfDocument::new("My first PDF");
 

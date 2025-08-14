@@ -4,4 +4,6 @@
 # then converting to pixel using the geo_row_offset
 pixel_x = 0
 pixel_y = 0
+latitude = 0.0
+longitude = 0.0
 knmi_api_key = ""

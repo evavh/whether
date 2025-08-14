@@ -4,12 +4,12 @@ use chrono::{DateTime, Local, NaiveDateTime};
 use hdf5_metno::types::FixedAscii;
 use reqwest::{blocking, header};
 use serde::{Deserialize, Serialize};
-use toml::{Table, Value, map::Map};
+use toml::Table;
 
 const PRECIP_URL: &str = "https://api.dataplatform.knmi.nl/open-data/v1/datasets/radar_forecast/versions/2.0/files";
 
 pub(super) fn get_precip_data(
-    config: Map<String, Value>,
+    config: &Table,
 ) -> BTreeMap<DateTime<Local>, u16> {
     let pixel = Pixel::from_config(&config);
     let knmi_api_key = config["knmi_api_key"].as_str().unwrap();
