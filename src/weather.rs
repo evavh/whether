@@ -1,4 +1,7 @@
-use std::collections::{BTreeMap, HashMap};
+use std::{
+    collections::{BTreeMap, HashMap},
+    fmt::Display,
+};
 
 use chrono::{DateTime, Local, NaiveDateTime};
 use reqwest::blocking;
@@ -38,16 +41,88 @@ struct Data {
 
 #[derive(Debug)]
 pub(crate) struct Weather {
+    temperature_2m: f64,
+    relative_humidity_2m: usize,
     apparent_temperature: f64,
-    cloud_cover: usize,
+
     precipitation: f64,
     precipitation_probability: usize,
-    relative_humidity_2m: usize,
-    temperature_2m: f64,
+
+    cloud_cover: usize,
+    // TODO: display with icon
     weather_code: usize,
     wind_direction_10m: usize,
     wind_gusts_10m: f64,
     wind_speed_10m: f64,
+}
+
+fn wind_direction(degrees: usize) -> String {
+    match degrees as f64 {
+        0.0..=11.25 => "N",
+        11.25..=33.75 => "NNE",
+        33.75..=56.25 => "NE",
+        56.25..=78.75 => "ENE",
+        78.75..=101.25 => "E",
+        101.25..=123.75 => "ESE",
+        123.75..=146.25 => "SE",
+        146.25..=168.75 => "SSE",
+        168.75..=191.25 => "S",
+        191.25..=213.75 => "SSW",
+        213.75..=236.25 => "SW",
+        236.25..=258.75 => "WSW",
+        258.75..=281.25 => "W",
+        281.25..=303.75 => "WNW",
+        303.75..=326.25 => "NW",
+        326.25..=348.75 => "NNW",
+        348.75..=360.0 => "N",
+        _ => "INVALID",
+    }
+    .to_owned()
+}
+
+fn to_beaufort(wind_kph: f64) -> usize {
+    if wind_kph < 1.0 {
+        return 0;
+    }
+    match wind_kph.round() as usize {
+        0..1 => 0,
+        1..=5 => 1,
+        6..=11 => 2,
+        12..=19 => 3,
+        20..=28 => 4,
+        29..=38 => 5,
+        39..=49 => 6,
+        50..=61 => 7,
+        62..=74 => 8,
+        75..=88 => 9,
+        89..=102 => 10,
+        103..=117 => 11,
+        118.. => 12,
+    }
+}
+
+impl Display for Weather {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let temp = format!(
+            "🌡️ {}C (💧 {}%, 🤒 {}C)",
+            self.temperature_2m,
+            self.relative_humidity_2m,
+            self.apparent_temperature
+        );
+        let precip = format!(
+            "☔️ {} %, {} mm",
+            self.precipitation_probability, self.precipitation
+        );
+        let clouds = format!("☁️ {}%", self.cloud_cover);
+        let wind = format!(
+            "{} {} ({} km/h)",
+            wind_direction(self.wind_direction_10m),
+            to_beaufort(self.wind_speed_10m),
+            self.wind_gusts_10m
+        );
+
+        write!(f, "{temp}\t| {precip}\t| {clouds}\t| {wind}")
+    }
 }
 
 pub(crate) fn get_weather(

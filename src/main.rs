@@ -28,11 +28,18 @@ fn main() {
 
     let precip = precip::get_precip_data(&config);
     let weather = weather::get_weather(&config);
-    dbg!(weather);
+    for (time, state) in &weather {
+        let time = time.time();
+        println!("{time:?} {state}");
+    }
 
     plot("output/plot.svg", &precip);
     let output_path = format!("output/{REPORT_UUID}.pdf");
-    generate_pdf("output/plot.svg", &output_path);
+    generate_pdf(
+        &weather.first_key_value().unwrap().1.to_string(),
+        "output/plot.svg",
+        &output_path,
+    );
 
     let to_copy = if args.first_run {
         files::create_metadata_files(1).unwrap();
