@@ -27,16 +27,16 @@ fn main() {
     let config: Table = config.parse().unwrap();
 
     let precip = precip::get_precip_data(&config);
-    let weather = weather::get_weather(&config);
-    for (time, state) in &weather {
-        let time = time.time();
-        println!("{time:?} {state}");
-    }
+    // let weather = weather::get_weather(&config);
+    // for (time, state) in &weather {
+    //     let time = time.time();
+    //     println!("{time:?} {state}");
+    // }
 
     plot("output/plot.svg", &precip);
     let output_path = format!("output/{REPORT_UUID}.pdf");
     generate_pdf(
-        &weather.first_key_value().unwrap().1.to_string(),
+        "hoi",// &weather.first_key_value().unwrap().1.to_string(),
         "output/plot.svg",
         &output_path,
     );
