@@ -35,11 +35,7 @@ fn main() {
 
     plot("output/plot.svg", &precip);
     let output_path = format!("output/{REPORT_UUID}.pdf");
-    generate_pdf(
-        "hoi",// &weather.first_key_value().unwrap().1.to_string(),
-        "output/plot.svg",
-        &output_path,
-    );
+    generate_pdf(vec!["output/plot.svg".to_string()], &output_path);
 
     let to_copy = if args.first_run {
         files::create_metadata_files(1).unwrap();
