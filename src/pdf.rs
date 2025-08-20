@@ -1,11 +1,7 @@
-use std::{
-    fs::{self, File},
-    io::{BufWriter, Cursor},
-};
+use std::fs::{self};
 
 use printpdf::{
-    BuiltinFont, Mm, Op, ParsedFont, PdfDocument, PdfPage, PdfSaveOptions,
-    Point, Svg, XObjectTransform,
+    Mm, Op, PdfDocument, PdfPage, PdfSaveOptions, Svg, XObjectTransform,
 };
 
 const DPI: f32 = 300.0;
@@ -27,7 +23,7 @@ pub(crate) fn generate_pdf(image_paths: Vec<String>, output_path: &str) {
     let mut doc = PdfDocument::new("Weather report");
     let mut ops = Vec::new();
 
-    for image_path in image_paths {
+    for (i, image_path) in image_paths.iter().enumerate() {
         let svg = fs::read_to_string(image_path).unwrap();
         let image = Svg::parse(&svg, &mut warnings).unwrap();
         let image_id = doc.add_xobject(&image);
@@ -36,7 +32,9 @@ pub(crate) fn generate_pdf(image_paths: Vec<String>, output_path: &str) {
             id: image_id,
             transform: XObjectTransform {
                 translate_x: Some(Mm(PLOT_POS_X_MM).into_pt()),
-                translate_y: Some(Mm(PLOT_POS_Y_MM).into_pt()),
+                translate_y: Some(
+                    Mm(PLOT_POS_Y_MM - PLOT_HEIGHT_MM * i as f32).into_pt(),
+                ),
                 rotate: None,
                 scale_x: None,
                 scale_y: None,

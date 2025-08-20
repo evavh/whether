@@ -1,3 +1,3 @@
 ./build.sh
 target/debug/whether
-open output/report.pdf
+open output/table.svg

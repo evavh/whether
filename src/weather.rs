@@ -41,19 +41,18 @@ struct Data {
 
 #[derive(Debug)]
 pub(crate) struct Weather {
-    temperature_2m: f64,
-    relative_humidity_2m: usize,
-    apparent_temperature: f64,
+    pub(crate) temperature_2m: f64,
+    pub(crate) relative_humidity_2m: usize,
+    pub(crate) apparent_temperature: f64,
 
-    precipitation: f64,
-    precipitation_probability: usize,
-
-    cloud_cover: usize,
+    pub(crate) precipitation: f64,
+    pub(crate) precipitation_probability: usize,
+    pub(crate) cloud_cover: usize,
     // TODO: display with icon
-    weather_code: usize,
-    wind_direction_10m: usize,
-    wind_gusts_10m: f64,
-    wind_speed_10m: f64,
+    pub(crate) weather_code: usize,
+    pub(crate) wind_direction_10m: usize,
+    pub(crate) wind_gusts_10m: f64,
+    pub(crate) wind_speed_10m: f64,
 }
 
 fn wind_direction(degrees: usize) -> String {
