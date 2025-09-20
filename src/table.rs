@@ -4,7 +4,7 @@ use std::fs;
 use chrono::{DateTime, Local};
 
 use crate::pdf::PLOT_WIDTH_PIXEL;
-use crate::weather::Weather;
+use crate::weather::{Weather, to_beaufort, wind_direction};
 
 const ROW_HEIGHT_PIXEL: usize = 30;
 
@@ -20,6 +20,8 @@ pub(crate) fn draw_table(path: &str, data: BTreeMap<DateTime<Local>, Weather>) {
          <tspan x="90">T</tspan>
          <tspan x="120">Feel</tspan>
          <tspan x="150">Hum</tspan>
+         <tspan x="190">Clouds</tspan>
+         <tspan x="240">Wind</tspan>
       </text>
 "##
     );
@@ -38,11 +40,16 @@ fn render_row(row: usize, time: DateTime<Local>, weather: Weather) -> String {
          <tspan x="90">{:.0}</tspan>
          <tspan x="120">{:.0}</tspan>
          <tspan x="150">{}%</tspan>
+         <tspan x="190">{}%</tspan>
+         <tspan x="240">{} {}</tspan>
       </text>"##,
         (row + 2) * ROW_HEIGHT_PIXEL,
         time.format("%H:%M"),
         weather.temperature_2m,
         weather.apparent_temperature,
-        weather.relative_humidity_2m
+        weather.relative_humidity_2m,
+        weather.cloud_cover,
+        wind_direction(weather.wind_direction_10m),
+        to_beaufort(weather.wind_speed_10m),
     )
 }

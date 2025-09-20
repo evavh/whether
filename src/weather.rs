@@ -55,7 +55,7 @@ pub(crate) struct Weather {
     pub(crate) wind_speed_10m: f64,
 }
 
-fn wind_direction(degrees: usize) -> String {
+pub(crate) fn wind_direction(degrees: usize) -> String {
     match degrees as f64 {
         0.0..=11.25 => "N",
         11.25..=33.75 => "NNE",
@@ -79,7 +79,7 @@ fn wind_direction(degrees: usize) -> String {
     .to_owned()
 }
 
-fn to_beaufort(wind_kph: f64) -> usize {
+pub(crate) fn to_beaufort(wind_kph: f64) -> usize {
     if wind_kph < 1.0 {
         return 0;
     }
