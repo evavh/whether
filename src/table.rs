@@ -7,13 +7,14 @@ use crate::pdf::PLOT_WIDTH_PIXEL;
 use crate::weather::{Weather, to_beaufort, wind_direction};
 
 const ROW_HEIGHT_PIXEL: usize = 30;
+pub(crate) const TABLE_HEIGHT_PIXEL: f32 = ROW_HEIGHT_PIXEL as f32 * 26.;
 
 pub(crate) fn draw_table(path: &str, data: BTreeMap<DateTime<Local>, Weather>) {
-    let table_height_pixel = ROW_HEIGHT_PIXEL * (data.len() + 2);
+    assert_eq!(data.len(), 24);
     let mut svg = format!(
         r##"
-<svg width="{PLOT_WIDTH_PIXEL}" height="{table_height_pixel}" viewBox="0 0 {PLOT_WIDTH_PIXEL} {table_height_pixel}" xmlns="http://www.w3.org/2000/svg">
-<rect x="0" y="0" width="{PLOT_WIDTH_PIXEL}" height="{table_height_pixel}" opacity="1" fill="#FFFFFF" stroke="none"/>
+<svg width="{PLOT_WIDTH_PIXEL}" height="{TABLE_HEIGHT_PIXEL}" viewBox="0 0 {PLOT_WIDTH_PIXEL} {TABLE_HEIGHT_PIXEL}" xmlns="http://www.w3.org/2000/svg">
+<rect x="0" y="0" width="{PLOT_WIDTH_PIXEL}" height="{TABLE_HEIGHT_PIXEL}" opacity="1" fill="#FFFFFF" stroke="none"/>
 <g xmlns="http://www.w3.org/2000/svg" id="rowGroup">
 <text x="{ROW_HEIGHT_PIXEL}" y="30" font-size="18px" text-anchor="start">
          <tspan x="30" font-weight="bold" fill="crimson" text-anchor="start">Time</tspan>
