@@ -1,4 +1,4 @@
-use std::{collections::BTreeMap, fs};
+use std::{collections::BTreeMap, env, fs};
 
 use chrono::{DateTime, Local, NaiveDateTime};
 use hdf5_metno::types::FixedAscii;
@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 use toml::Table;
 
 const PRECIP_URL: &str = "https://api.dataplatform.knmi.nl/open-data/v1/datasets/radar_forecast/versions/2.0/files";
+const DATA_PATH: &str = "/tmp";
 
 pub(super) fn get_precip_data(
     config: &Table,
@@ -17,7 +18,7 @@ pub(super) fn get_precip_data(
 
     let latest_filename = get_latest_filename(knmi_api_key, &client);
     let file_url = get_file_url(knmi_api_key, &client, &latest_filename);
-    let path = &format!("input/{latest_filename}");
+    let path = &format!("{DATA_PATH}/{latest_filename}",);
 
     download_file(client, file_url, path);
     let data = hdf5_metno::File::open(path).unwrap();

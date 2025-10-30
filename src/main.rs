@@ -1,4 +1,4 @@
-use std::{fs, process::Command, thread, time::Duration};
+use std::{env, fs, process::Command, thread, time::Duration};
 
 use clap::Parser;
 use table::draw_table;
@@ -15,7 +15,8 @@ mod precip;
 mod table;
 mod weather;
 
-const CONFIG: &str = "config.toml";
+const CONFIG: &str = ".config/whether.toml";
+const OUTPUT_DIR: &str = "/tmp";
 
 #[derive(Parser, Debug)]
 struct Args {
@@ -25,29 +26,34 @@ struct Args {
 
 fn main() {
     let args = Args::parse();
-    let config = fs::read_to_string(CONFIG).unwrap();
+    let config = fs::read_to_string(dbg!(format!(
+        "{}/{}",
+        env::var("HOME").unwrap(),
+        CONFIG
+    )))
+    .unwrap();
     let config: Table = config.parse().unwrap();
 
     println!("Generating weather report...");
     let precip = precip::get_precip_data(&config);
     let weather = weather::get_weather(&config);
 
-    draw_table("output/table.svg", weather);
-    plot_precip("output/plot.svg", &precip);
-    let output_path = format!("output/{REPORT_UUID}.pdf");
+    draw_table(&format!("{OUTPUT_DIR}/table.svg"), weather);
+    plot_precip(&format!("{OUTPUT_DIR}/plot.svg"), &precip);
+    let output_path = format!("{OUTPUT_DIR}/{REPORT_UUID}.pdf");
     generate_pdf(
         vec![
-            "output/plot.svg".to_string(),
-            "output/table.svg".to_string(),
+            format!("{OUTPUT_DIR}/plot.svg"),
+            format!("{OUTPUT_DIR}/table.svg"),
         ],
         &output_path,
     );
 
     let to_copy = if args.first_run {
         files::create_metadata_files(1).unwrap();
-        format!("output/{REPORT_UUID}*")
+        format!("{OUTPUT_DIR}/{REPORT_UUID}*")
     } else {
-        format!("output/{REPORT_UUID}.pdf")
+        format!("{OUTPUT_DIR}/{REPORT_UUID}.pdf")
     };
 
     println!("Start sending to remarkable");
