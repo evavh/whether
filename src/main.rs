@@ -1,4 +1,4 @@
-use std::{fs, process::Command};
+use std::{fs, process::Command, thread, time::Duration};
 
 use clap::Parser;
 use table::draw_table;
@@ -28,12 +28,9 @@ fn main() {
     let config = fs::read_to_string(CONFIG).unwrap();
     let config: Table = config.parse().unwrap();
 
+    println!("Generating weather report...");
     let precip = precip::get_precip_data(&config);
     let weather = weather::get_weather(&config);
-    for (time, state) in &weather {
-        let time = time.time();
-        println!("{time:?} {state}");
-    }
 
     draw_table("output/table.svg", weather);
     plot_precip("output/plot.svg", &precip);
@@ -52,11 +49,25 @@ fn main() {
     } else {
         format!("output/{REPORT_UUID}.pdf")
     };
-    // TODO: retry if failed because no connection
-    let rsynced = Command::new("rsync")
-        .arg(to_copy)
-        .arg("remarkable:/home/root/.local/share/remarkable/xochitl/")
-        .output()
-        .unwrap();
-    dbg!(rsynced);
+
+    println!("Start sending to remarkable");
+    loop {
+        let rsynced = Command::new("rsync")
+            .arg(&to_copy)
+            .arg("remarkable:/home/root/.local/share/remarkable/xochitl/")
+            .output()
+            .unwrap();
+        let stderr = str::from_utf8(&rsynced.stderr).unwrap();
+
+        if stderr.contains("No route to host") {
+            println!("Couldn't connect, retrying in 30s");
+            thread::sleep(Duration::from_secs(30));
+        } else if rsynced.status.success() {
+            println!("Send succesful");
+            return;
+        } else {
+            println!("Unexpected error: {}", stderr);
+            return;
+        }
+    }
 }
