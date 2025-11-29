@@ -16,7 +16,7 @@ mod table;
 mod weather;
 
 const CONFIG: &str = ".config/whether.toml";
-const OUTPUT_DIR: &str = "/tmp";
+const OUTPUT_DIR: &str = "/tmp/whether_output";
 
 #[derive(Parser, Debug)]
 struct Args {
@@ -51,16 +51,16 @@ fn main() {
 
     let to_copy = if args.first_run {
         files::create_metadata_files(1).unwrap();
-        format!("{OUTPUT_DIR}/{REPORT_UUID}*")
+        format!("--include=\"{OUTPUT_DIR}/{REPORT_UUID}*\"")
     } else {
         format!("{OUTPUT_DIR}/{REPORT_UUID}.pdf")
     };
 
     println!("Start sending to remarkable");
     loop {
-        let rsynced = Command::new("rsync")
+        let rsynced = dbg!(Command::new("rsync")
             .arg(&to_copy)
-            .arg("remarkable:/home/root/.local/share/remarkable/xochitl/")
+            .arg("root@remarkable:/home/root/.local/share/remarkable/xochitl/"))
             .output()
             .unwrap();
         let stderr = str::from_utf8(&rsynced.stderr).unwrap();

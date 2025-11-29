@@ -8,25 +8,26 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use color_eyre::eyre::{Context, Result};
 
-#[cfg(target_arch = "arm")]
-pub const DIR: &str = "/home/root/.local/share/remarkable/xochitl";
-#[cfg(not(target_arch = "arm"))]
-pub const DIR: &str = "output";
+use crate::OUTPUT_DIR;
 
 pub(crate) const REPORT_UUID: &str = "56f3ee9d-413b-4651-ac97-f9a9932a760a";
 
 pub fn create_metadata_files(n_pages: usize) -> Result<()> {
     log::info!("report uuid: {REPORT_UUID} (constant)");
-    let path = Path::new(DIR).join(REPORT_UUID);
+    if let Err(e) = fs::create_dir(OUTPUT_DIR)
+        && e.kind() != ErrorKind::AlreadyExists
+    {
+        Err(e)
+            .wrap_err_with(|| format!("Failed to create {OUTPUT_DIR} dir"))?;
+    };
+    let path = Path::new(OUTPUT_DIR).join(REPORT_UUID);
 
     fs::write(path.with_extension("content"), content(n_pages))?;
     fs::write(path.with_extension("metadata"), metadata())?;
     fs::write(path.with_extension("pagedata"), "")?;
-    for dir_ext in &["", "cache", "highlights", "thumbnails", "textconversion"]
-    {
+    for dir_ext in &["cache", "highlights", "thumbnails", "textconversion"] {
         if let Err(e) = fs::create_dir(path.with_extension(dir_ext))
-            && e.kind() == ErrorKind::AlreadyExists
-            && path.with_extension(dir_ext).is_dir()
+            && e.kind() != ErrorKind::AlreadyExists
         {
             Err(e)
                 .wrap_err_with(|| format!("Failed to create {dir_ext} dir"))?;
