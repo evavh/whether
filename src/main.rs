@@ -44,7 +44,7 @@ fn main() {
     generate_pdf(&output_path);
 
     let to_copy = if args.first_run {
-        files::create_metadata_files(1).unwrap();
+        files::create_metadata_files(2).unwrap();
         vec![
             format!("{OUTPUT_DIR}/{REPORT_UUID}"),
             format!("{OUTPUT_DIR}/{REPORT_UUID}.cache"),

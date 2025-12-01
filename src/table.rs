@@ -7,16 +7,18 @@ use crate::plot::PLOT_WIDTH_PIXEL;
 use crate::weather::{Weather, to_beaufort, wind_direction};
 
 const ROW_HEIGHT_PIXEL: usize = 30;
-pub(crate) const TABLE_HEIGHT_PIXEL: f32 = ROW_HEIGHT_PIXEL as f32 * 26.;
+pub(crate) const TABLE_HEIGHT_PIXEL: f32 = ROW_HEIGHT_PIXEL as f32 * 27.;
 
 pub(crate) fn draw_table(path: &str, data: BTreeMap<DateTime<Local>, Weather>) {
     assert_eq!(data.len(), 24);
+    let last_updated = Local::now().format("%d-%m-%Y %H:%M");
     let mut svg = format!(
         r##"
 <svg width="{PLOT_WIDTH_PIXEL}" height="{TABLE_HEIGHT_PIXEL}" viewBox="0 0 {PLOT_WIDTH_PIXEL} {TABLE_HEIGHT_PIXEL}" xmlns="http://www.w3.org/2000/svg">
 <rect x="0" y="0" width="{PLOT_WIDTH_PIXEL}" height="{TABLE_HEIGHT_PIXEL}" opacity="1" fill="#FFFFFF" stroke="none"/>
 <g xmlns="http://www.w3.org/2000/svg" id="rowGroup">
-<text x="{ROW_HEIGHT_PIXEL}" y="30" font-size="18px" text-anchor="start">
+<text x="{ROW_HEIGHT_PIXEL}" y="30" font-size="18px" text-anchor="start">Last updated: {last_updated}</text>
+<text x="{ROW_HEIGHT_PIXEL}" y="60" font-size="18px" text-anchor="start">
          <tspan x="30" font-weight="bold" fill="crimson" text-anchor="start">Time</tspan>
          <tspan x="90">T</tspan>
          <tspan x="120">Feel</tspan>
@@ -44,7 +46,7 @@ fn render_row(row: usize, time: DateTime<Local>, weather: Weather) -> String {
          <tspan x="190">{}%</tspan>
          <tspan x="240">{} {}</tspan>
       </text>"##,
-        (row + 2) * ROW_HEIGHT_PIXEL,
+        (row + 3) * ROW_HEIGHT_PIXEL,
         time.format("%H:%M"),
         weather.temperature_2m,
         weather.apparent_temperature,
