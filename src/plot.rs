@@ -4,7 +4,19 @@ use chrono::{DateTime, Local};
 
 use std::collections::BTreeMap;
 
-use crate::pdf::{PLOT_HEIGHT_PIXEL, PLOT_WIDTH_PIXEL};
+use crate::table::TABLE_HEIGHT_PIXEL;
+
+const DPI: f32 = 300.0;
+const PAGE_WIDTH_MM: f32 = 157.2;
+const PAGE_HEIGHT_MM: f32 = 209.6;
+const MARGIN_MM: f32 = 15.0;
+const PLOT_ASPECT_RATIO: f32 = 3.0;
+
+const DPMM: f32 = DPI / 25.4;
+const PLOT_WIDTH_MM: f32 = PAGE_WIDTH_MM - MARGIN_MM * 2.;
+const PLOT_HEIGHT_MM: f32 = PLOT_WIDTH_MM / PLOT_ASPECT_RATIO;
+pub(crate) const PLOT_WIDTH_PIXEL: f32 = PLOT_WIDTH_MM * DPMM;
+pub(crate) const PLOT_HEIGHT_PIXEL: f32 = PLOT_HEIGHT_MM * DPMM;
 
 const TEXT_SIZE_PT: u32 = 40;
 
@@ -17,7 +29,7 @@ pub(super) fn plot_precip(path: &str, data: &BTreeMap<DateTime<Local>, u16>) {
         path,
         (
             PLOT_WIDTH_PIXEL.round() as u32,
-            PLOT_HEIGHT_PIXEL.round() as u32,
+            TABLE_HEIGHT_PIXEL.round() as u32,
         ),
     )
     .into_drawing_area();

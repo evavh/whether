@@ -41,28 +41,32 @@ fn main() {
     draw_table(&format!("{OUTPUT_DIR}/table.svg"), weather);
     plot_precip(&format!("{OUTPUT_DIR}/plot.svg"), &precip);
     let output_path = format!("{OUTPUT_DIR}/{REPORT_UUID}.pdf");
-    generate_pdf(
-        vec![
-            format!("{OUTPUT_DIR}/plot.svg"),
-            format!("{OUTPUT_DIR}/table.svg"),
-        ],
-        &output_path,
-    );
+    generate_pdf(&output_path);
 
     let to_copy = if args.first_run {
         files::create_metadata_files(1).unwrap();
-        format!("--include=\"{OUTPUT_DIR}/{REPORT_UUID}*\"")
+        vec![
+            format!("{OUTPUT_DIR}/{REPORT_UUID}"),
+            format!("{OUTPUT_DIR}/{REPORT_UUID}.cache"),
+            format!("{OUTPUT_DIR}/{REPORT_UUID}.content"),
+            format!("{OUTPUT_DIR}/{REPORT_UUID}.highlights"),
+            format!("{OUTPUT_DIR}/{REPORT_UUID}.metadata"),
+            format!("{OUTPUT_DIR}/{REPORT_UUID}.pagedata"),
+            format!("{OUTPUT_DIR}/{REPORT_UUID}.pdf"),
+            format!("{OUTPUT_DIR}/{REPORT_UUID}.textconversion"),
+            format!("{OUTPUT_DIR}/{REPORT_UUID}.thumbnails"),
+        ]
     } else {
-        format!("{OUTPUT_DIR}/{REPORT_UUID}.pdf")
+        vec![format!("{OUTPUT_DIR}/{REPORT_UUID}.pdf")]
     };
 
     println!("Start sending to remarkable");
     loop {
-        let rsynced = dbg!(Command::new("rsync")
-            .arg(&to_copy)
-            .arg("root@remarkable:/home/root/.local/share/remarkable/xochitl/"))
-            .output()
-            .unwrap();
+        let rsynced = dbg!(Command::new("rsync").args(&to_copy).arg(
+            "root@remarkable:/home/root/.local/share/remarkable/xochitl/"
+        ))
+        .output()
+        .unwrap();
         let stderr = str::from_utf8(&rsynced.stderr).unwrap();
 
         if stderr.contains("No route to host") {

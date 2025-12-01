@@ -3,7 +3,7 @@ use std::fs;
 
 use chrono::{DateTime, Local};
 
-use crate::pdf::PLOT_WIDTH_PIXEL;
+use crate::plot::PLOT_WIDTH_PIXEL;
 use crate::weather::{Weather, to_beaufort, wind_direction};
 
 const ROW_HEIGHT_PIXEL: usize = 30;
