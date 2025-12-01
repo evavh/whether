@@ -15,6 +15,7 @@ pub(crate) fn generate_pdf(output_path: &str) {
         .unwrap();
     Command::new("convert")
         .arg(format!("{OUTPUT_DIR}/plot.png"))
+        .arg(format!("{OUTPUT_DIR}/table.png"))
         .arg(output_path)
         .output()
         .unwrap();
