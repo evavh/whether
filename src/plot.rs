@@ -4,8 +4,6 @@ use chrono::{DateTime, Local};
 
 use std::collections::BTreeMap;
 
-use crate::table::TABLE_HEIGHT_PIXEL;
-
 const DPI: f32 = 300.0;
 const PAGE_WIDTH_MM: f32 = 157.2;
 const PAGE_HEIGHT_MM: f32 = 209.6;
@@ -29,7 +27,7 @@ pub(super) fn plot_precip(path: &str, data: &BTreeMap<DateTime<Local>, u16>) {
         path,
         (
             PLOT_WIDTH_PIXEL.round() as u32,
-            TABLE_HEIGHT_PIXEL.round() as u32,
+            PLOT_HEIGHT_PIXEL.round() as u32,
         ),
     )
     .into_drawing_area();

@@ -1,1 +1,1 @@
-Install imagemagick
+Install imagemagick and inkscape
