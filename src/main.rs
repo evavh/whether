@@ -38,6 +38,7 @@ fn main() {
     let precip = precip::get_precip_data(&config);
     let weather = weather::get_weather(&config);
 
+    let _ = fs::create_dir(OUTPUT_DIR); // Ignore file exists
     draw_table(&format!("{OUTPUT_DIR}/table.svg"), weather);
     plot_precip(&format!("{OUTPUT_DIR}/plot.svg"), &precip);
     let output_path = format!("{OUTPUT_DIR}/{REPORT_UUID}.pdf");
@@ -61,7 +62,7 @@ fn main() {
     };
 
     println!("Start sending to remarkable");
-    loop {
+    for _ in 0..5 { // only retry 5 times
         let rsynced = dbg!(Command::new("rsync").args(&to_copy).arg(
             "root@remarkable:/home/root/.local/share/remarkable/xochitl/"
         ))
