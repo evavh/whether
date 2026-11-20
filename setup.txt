@@ -1,1 +1,0 @@
-Install imagemagick and inkscape

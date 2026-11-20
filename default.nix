@@ -8,7 +8,11 @@ in
 pkgs.rustPlatform.buildRustPackage {
   pname = cargoTOML.package.name;
   version = cargoTOML.package.version;
+  meta = {
+    mainProgram = "whether";
+  };
   nativeBuildInputs = [ pkgs.cmake ];
+  buildInputs = [ pkgs.imagemagick pkgs.inkscape ];
   cargoLock = {
     lockFile = "${src}/Cargo.lock";
   };
