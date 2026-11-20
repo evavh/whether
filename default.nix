@@ -1,5 +1,7 @@
 {
   pkgs ? import <nixpkgs> { },
+  lib,
+  ...
 }:
 let
   src = pkgs.lib.cleanSource ./.;
@@ -11,11 +13,25 @@ pkgs.rustPlatform.buildRustPackage {
   meta = {
     mainProgram = "whether";
   };
-  nativeBuildInputs = [ pkgs.cmake ];
-  buildInputs = [ pkgs.imagemagick pkgs.inkscape ];
+  nativeBuildInputs = [ pkgs.cmake pkgs.makeWrapper ];
   cargoLock = {
     lockFile = "${src}/Cargo.lock";
   };
+
+  runtimeInputs = [
+    pkgs.imagemagick
+    pkgs.inkscape
+    pkgs.rsync
+    pkgs.openssh
+  ];
+  postFixup = "wrapProgram $out/bin/whether --prefix PATH : ${
+    lib.makeBinPath [
+      pkgs.imagemagick
+      pkgs.inkscape
+      pkgs.rsync
+      pkgs.openssh
+    ]
+  }";
 
   inherit src;
 }
