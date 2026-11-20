@@ -4,3 +4,4 @@ output/
 compilers/
 setup_crosscompile/target/
 config.toml
+result

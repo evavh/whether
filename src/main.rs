@@ -15,7 +15,7 @@ mod precip;
 mod table;
 mod weather;
 
-const CONFIG: &str = ".config/whether.toml";
+const CONFIG_FILE: &str = "whether.toml";
 const OUTPUT_DIR: &str = "/tmp/whether_output";
 
 #[derive(Parser, Debug)]
@@ -28,8 +28,8 @@ fn main() {
     let args = Args::parse();
     let config = fs::read_to_string(dbg!(format!(
         "{}/{}",
-        env::var("HOME").unwrap(),
-        CONFIG
+        env::var("XDG_CONFIG_HOME").unwrap(),
+        CONFIG_FILE
     )))
     .unwrap();
     let config: Table = config.parse().unwrap();
@@ -62,10 +62,13 @@ fn main() {
     };
 
     println!("Start sending to remarkable");
-    for _ in 0..5 { // only retry 5 times
-        let rsynced = dbg!(Command::new("rsync").args(&to_copy).arg(
-            "root@remarkable:/home/root/.local/share/remarkable/xochitl/"
-        ))
+    for _ in 0..5 {
+        // only retry 5 times
+        let rsynced = dbg!(
+            Command::new("rsync")
+                .args(&to_copy)
+                .arg("root@remarkable:/home/root/.local/share/remarkable/xochitl/")
+        )
         .output()
         .unwrap();
         let stderr = str::from_utf8(&rsynced.stderr).unwrap();
